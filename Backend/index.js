@@ -17,9 +17,9 @@ mongoose.connect(process.env.MONGODB_URI)
     console.log('✅ MongoDB connected');
     
     // Initialize routes after successful connection
-    const imageRoutes = require('./src/routes/imageGeneration');
-    const imagePollinationRoutes = require('./src/routes/imagePollination');
-    const documentProcessingRoutes = require('./src/routes/generatePrompts');
+    const imageRoutes = require('./src/routes/imageGeneration.js');
+    const imagePollinationRoutes = require('./src/routes/imagePollination.js');
+    const documentProcessingRoutes = require('./src/routes/generatePrompts.js');
 
     app.use('/api/image/stability', imageRoutes);
     app.use('/api/image/pollination', imagePollinationRoutes);
@@ -35,7 +35,7 @@ mongoose.connect(process.env.MONGODB_URI)
     });
 
     // Error handler middleware
-    const errorHandler = require('./src/middleware/errorHandler');
+    const errorHandler = require('./src/middleware/errorHandler.js');
     app.use(errorHandler);
 
     // Start the server after routes are registered
