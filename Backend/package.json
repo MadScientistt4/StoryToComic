@@ -12,8 +12,11 @@
   "dependencies": {
     "deepai": "^1.0.23",
     "express-rate-limit": "^7.5.0",
+    "gridfs-stream": "^1.1.1",
     "mammoth": "^1.9.0",
     "node-fetch": "^3.3.2",
-    "pdf-lib": "^1.17.1"
+    "pdf-lib": "^1.17.1",
+    "pdfkit": "^0.17.0",
+    "util": "^0.12.5"
   }
 }

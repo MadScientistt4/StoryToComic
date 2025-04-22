@@ -26,6 +26,14 @@ export const Sidebar = () => {
           <li>
             <button
               className="btn w-100 text-start mb-2 btn-outline-secondary"
+              onClick={() => navigate("/comics")} // Navigate to homepage
+            >
+              Comics
+            </button>
+          </li>
+          <li>
+            <button
+              className="btn w-100 text-start mb-2 btn-outline-secondary"
               onClick={() => navigate("/visuals")} // Navigate to visuals page
             >
               Visuals
@@ -40,25 +48,8 @@ export const Sidebar = () => {
             </button>
           </li>
         </ul>
-        <div>
-          <div className="text-secondary text-uppercase small mb-2">Collections</div>
-          <ul className="list-unstyled">
-            <li>
-              <button className="btn w-100 text-start mb-2 btn-outline-secondary">Samples</button>
-            </li>
-            <li>
-              <button className="btn w-100 text-start mb-2 btn-outline-secondary">Pictures</button>
-            </li>
-            <li>
-              <button className="btn w-100 text-start mb-2 btn-outline-secondary">Folklores</button>
-            </li>
-            <li>
-              <button className="btn w-100 text-start mb-2 btn-outline-secondary">Fairytales</button>
-            </li>
-            
-          </ul>
-
-        </div>
+        
+          
         
       </nav>
       <Button variant="outline-danger" onClick={handleLogout} className="mt-3 w-90">

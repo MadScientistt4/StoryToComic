@@ -119,7 +119,7 @@ Now begin creating your prompts:
   .split("Panel")
   .map(p => p.trim())
   .filter(Boolean);
-
+    prompts.shift()
 
     // Use update instead of save
     await Story.findByIdAndUpdate(storyId, { prompts });

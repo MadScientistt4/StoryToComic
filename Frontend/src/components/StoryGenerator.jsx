@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import axios from 'axios';
 
 export default function DocumentToImages() {
@@ -7,6 +7,10 @@ export default function DocumentToImages() {
     const [prompts, setPrompts] = useState([]);
     const [images, setImages] = useState([]);
     const [storyId, setStoryId] = useState(null);
+    const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+    const [dragActive, setDragActive] = useState(false);
+
+    const inputRef = useRef(null);
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
@@ -21,6 +25,29 @@ export default function DocumentToImages() {
         } else {
             setDocumentText('Preview available after upload.');
         }
+    };
+
+    const handleDrag = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.type === 'dragenter' || e.type === 'dragover') {
+            setDragActive(true);
+        } else if (e.type === 'dragleave') {
+            setDragActive(false);
+        }
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragActive(false);
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            handleFileChange({ target: { files: e.dataTransfer.files } });
+        }
+    };
+
+    const handleBrowseClick = () => {
+        inputRef.current.click();
     };
 
     const uploadDocument = async () => {
@@ -47,16 +74,60 @@ export default function DocumentToImages() {
         const res = await axios.post(`http://localhost:5000/api/functionality/generate-images/${storyId}`);
         setImages(res.data.images);
     };
+    const handleSavePDF = async () => {
+        if (!storyId) return;
+        
+        setIsGeneratingPDF(true);
+        try {
+            const response = await axios.post(
+                `http://localhost:5000/api/pdf/generate-pdf/${storyId}`
+            );
+            
+            if (response.data.success) {
+                alert('PDF saved successfully!');
+                // Optional: You could redirect to the PDF library here
+            }
+        } catch (error) {
+            console.error('PDF save failed:', error);
+            alert('Failed to save PDF. Please try again.');
+        } finally {
+            setIsGeneratingPDF(false);
+        }
+    };
 
     return (
         <div className="container py-5">
             <h1 className="mb-4 text-center ">Short Story to Comic</h1>
 
-            <div className="mb-3">
-                <input type="file" className="form-control" onChange={handleFileChange} />
+            {/* DRAG AND DROP FILE INPUT */}
+            <div
+                className={`mb-3 border border-2 rounded p-4 text-center ${dragActive ? 'bg-light' : ''}`}
+                onDragEnter={handleDrag}
+                onDragOver={handleDrag}
+                onDragLeave={handleDrag}
+                onDrop={handleDrop}
+                style={{ cursor: 'pointer', borderStyle: 'dashed' }}
+                onClick={handleBrowseClick}
+            >
+                <input
+                    ref={inputRef}
+                    type="file"
+                    className="d-none"
+                    onChange={handleFileChange}
+                />
+                <div>
+                    <p className="mb-2">
+                        {file ? (
+                            <span><b>Selected:</b> {file.name}</span>
+                        ) : (
+                            <>Drag and drop your document here, or <span className="text-primary" style={{ textDecoration: 'underline', cursor: 'pointer' }}>browse</span></>
+                        )}
+                    </p>
+                </div>
             </div>
+            {/* END DRAG AND DROP FILE INPUT */}
 
-            <button onClick={uploadDocument} className="btn btn-primary mb-4">Upload Document</button>
+            <button onClick={uploadDocument} className="btn btn-dark mb-4">Upload Document</button>
 
             {documentText && (
                 <div className="mb-4">
@@ -92,15 +163,24 @@ export default function DocumentToImages() {
                                 </div>
                             </div>
                         ))}
-                        <a
-                            className="btn btn-danger"
-                            href={`http://localhost:5000/api/story/story-pdf/${storyId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            Download Comic as PDF
-                        </a>
+                        <div className="mt-4 d-flex gap-2">
+                            <button
+                                className="btn btn-primary"
+                                onClick={handleSavePDF}
+                                disabled={isGeneratingPDF}
+                            >
+                                {isGeneratingPDF ? 'Saving PDF...' : 'Save PDF to Database'}
+                            </button>
 
+                            <a
+                                className="btn btn-danger"
+                                href={`http://localhost:5000/api/story/story-pdf/${storyId}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                Download Comic as PDF
+                            </a>
+                        </div>
                     </div>
                 </div>
             )}

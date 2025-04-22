@@ -7,17 +7,73 @@ const { PDFDocument } = require('pdf-lib');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 const router = express.Router();
-
-// Route to get all stories
-// backend/routes/story.js
+/**
+ * GET /api/story/all-stories
+ * List all stories
+ */
 router.get('/all-stories', async (req, res) => {
   try {
-    const stories = await Story.find().select('title _id createdAt originalText').sort({ createdAt: -1 });
+    const stories = await Story.find()
+      .sort({ createdAt: -1 }); // most recent first
     res.json({ success: true, stories });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch stories.' });
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
+
+/**
+ * DELETE /api/story/story/:id
+ * Delete a story and all its associated images
+ */
+router.delete('/story/:id', async (req, res) => {
+  try {
+    const story = await Story.findById(req.params.id);
+    if (!story) {
+      return res
+        .status(404)
+        .json({ success: false, error: 'Story not found' });
+    }
+
+    // Remove all images linked to this story's document
+    await Image.deleteMany({ document: story.document });
+
+    // Delete the story using its ID
+    await Story.findByIdAndDelete(req.params.id);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * GET /api/story/stories/:id/images
+ * Fetch all image URLs for a given story
+ */
+router.get('/stories/:id/images', async (req, res) => {
+  try {
+    const story = await Story.findById(req.params.id);
+    if (!story) {
+      return res.status(404).json({ error: 'Story not found' });
+    }
+
+    // Find all Image docs whose `document` matches the story.document
+    const images = await Image.find({ document: story.document })
+      .select('url prompt filename fileId -_id');
+
+    // If you just want to send back an array of URLs:
+    // const urls = images.map(img => img.url);
+    // return res.json({ images: urls });
+
+    res.json({ images });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch images' });
+  }
+});
+
 //Prompts for a story
 // backend/routes/story.js
 router.get('/prompts/:storyId', async (req, res) => {

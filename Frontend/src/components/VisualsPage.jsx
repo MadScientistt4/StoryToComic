@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card } from 'react-bootstrap';
+import { Sidebar } from './Sidebar';
 
 const libraryItems = [
   { id: 1, title: 'Cinderella', type: 'Shared file', image: 'https://images.nightcafe.studio/jobs/wmO4nQRGP5u61j2oioi9/wmO4nQRGP5u61j2oioi9--3--byafv.jpg?tr=w-1600,c-at_max', documentText: 'Once upon a time, Cinderella lived with her stepmother and stepsisters...' },
@@ -11,25 +12,34 @@ const libraryItems = [
 
 const VisualsPage = () => {
   return (
-    <div className="p-4">
+    <div className="container-fluid p-4">
       <h2 className="mb-4">Visuals - All Generated Photos</h2>
-      <div className="row row-cols-1 row-cols-md-3 g-4">
-        {libraryItems.map(item => (
-          <div className="col" key={item.id}>
-            <Card className="shadow-sm h-100">
-              <Card.Img
-                variant="top"
-                src={item.image}
-                alt={item.title}
-                style={{ height: '200px', objectFit: 'cover' }}
-              />
-              <Card.Body>
-                <Card.Title>{item.title}</Card.Title>
-                <Card.Text className="text-muted">{item.type}</Card.Text>
-              </Card.Body>
-            </Card>
+      <div className="row">
+        {/* Sidebar column */}
+        <div className="col-md-3 mb-4">
+          <Sidebar />
+        </div>
+        {/* Cards column */}
+        <div className="col-md-9">
+          <div className="row row-cols-1 row-cols-md-3 g-4">
+            {libraryItems.map(item => (
+              <div className="col" key={item.id}>
+                <Card className="shadow-sm h-100">
+                  <Card.Img
+                    variant="top"
+                    src={item.image}
+                    alt={item.title}
+                    style={{ height: '200px', objectFit: 'cover' }}
+                  />
+                  <Card.Body>
+                    <Card.Title>{item.title}</Card.Title>
+                    <Card.Text className="text-muted">{item.type}</Card.Text>
+                  </Card.Body>
+                </Card>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );

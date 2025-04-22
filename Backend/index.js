@@ -23,9 +23,11 @@ mongoose.connect(process.env.MONGODB_URI)
     const documentProcessingRoutes = require('./src/testing/generatePrompts.js');
     const basicFunctionality = require("./src/routes/basicFunctionalityRoutes")
     const imageRoutes = require("./src/routes/imageRoutes")
+    const pdfRoutes = require("./src/routes/pdfRoutes.js")
     //app.use('/api/image/stability', imageRoutes);
     //app.use('/api/image/pollination', imagePollinationRoutes);
     //app.use('/api/document', documentProcessingRoutes);
+    app.use("/api/pdf", pdfRoutes);
     app.use("/api/image", imageRoutes);
     app.use('/api/story', storyRoutes);
     app.use('/api/functionality', basicFunctionality)
