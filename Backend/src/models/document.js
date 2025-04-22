@@ -1,16 +1,11 @@
+// backend/models/Document.js
 const mongoose = require('mongoose');
 
-const documentSchema = new mongoose.Schema({
+const DocumentSchema = new mongoose.Schema({
   originalName: String,
-  prompts: [String],
-  images: [{ 
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Image'
-  }],
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
-  }
+  fileId:       mongoose.Schema.Types.ObjectId,  // <— new!
+  imageCount:   { type: Number, default: 0 },
+  images:       [{ type: mongoose.Schema.Types.ObjectId, ref: 'Image' }]
 });
 
-module.exports = mongoose.model('Document', documentSchema);
+module.exports = mongoose.model('Document', DocumentSchema);

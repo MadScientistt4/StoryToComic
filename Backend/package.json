@@ -12,6 +12,8 @@
   "dependencies": {
     "deepai": "^1.0.23",
     "express-rate-limit": "^7.5.0",
-    "mammoth": "^1.9.0"
+    "mammoth": "^1.9.0",
+    "node-fetch": "^3.3.2",
+    "pdf-lib": "^1.17.1"
   }
 }

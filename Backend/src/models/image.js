@@ -1,11 +1,12 @@
+// models/Image.js
 const mongoose = require('mongoose');
 
-const imageSchema = new mongoose.Schema({
-  prompt: String,
-  filename: String,
-  url: String,
-  document: { type: mongoose.Schema.Types.ObjectId, ref: 'Document' },
-  createdAt: { type: Date, default: Date.now }
+const ImageSchema = new mongoose.Schema({
+  prompt:   String,
+  filename: String,                            // currently storing uploadStream.id
+  fileId:   mongoose.Schema.Types.ObjectId,    // <-- new: store GridFS ObjectId
+  url:      String,
+  document: { type: mongoose.Schema.Types.ObjectId, ref: 'Document' }
 });
 
-module.exports = mongoose.model('Image', imageSchema);
+module.exports = mongoose.model('Image', ImageSchema);
