@@ -100,17 +100,29 @@ ${story.originalText}
 Now begin creating your prompts:
 `;
 
-
     const aiResponse = await axios.post(
       'https://openrouter.ai/api/v1/chat/completions',
-      { model: 'mistralai/mistral-7b-instruct', messages: [{ role: 'user', content: promptText }] },
-      { headers: { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' } }
+      {
+        model: 'mistralai/mistral-7b-instruct',
+        messages: [{ role: 'user', content: promptText }],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      }
     );
 
     const content = aiResponse.data.choices[0].message.content;
-    const prompts = content.split('\n').filter(line => line.trim());
-    story.prompts = prompts;
-    await story.save();
+    const prompts = content
+  .split("Panel")
+  .map(p => p.trim())
+  .filter(Boolean);
+
+
+    // Use update instead of save
+    await Story.findByIdAndUpdate(storyId, { prompts });
 
     res.status(200).json({ success: true, prompts });
   } catch (err) {
@@ -118,6 +130,7 @@ Now begin creating your prompts:
     res.status(500).json({ error: 'Failed to generate prompts.' });
   }
 });
+
 
 // 3. Generate images from prompts
 router.post('/generate-images/:storyId', async (req, res) => {

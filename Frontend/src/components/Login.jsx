@@ -12,7 +12,7 @@ const Login = () => {
     e.preventDefault();
 
     // Simple dummy login logic (replace with real auth)
-    if (username == 'userAdmin' && password == 'password1') {
+    if (username === 'userAdmin' && password === 'password1') {
       // Save login state (e.g., localStorage)
       navigate('/'); 
       localStorage.setItem('loggedIn', 'true');

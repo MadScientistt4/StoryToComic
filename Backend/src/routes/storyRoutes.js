@@ -12,7 +12,7 @@ const router = express.Router();
 // backend/routes/story.js
 router.get('/all-stories', async (req, res) => {
   try {
-    const stories = await Story.find().select('title _id createdAt').sort({ createdAt: -1 });
+    const stories = await Story.find().select('title _id createdAt originalText').sort({ createdAt: -1 });
     res.json({ success: true, stories });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch stories.' });
@@ -27,6 +27,15 @@ router.get('/prompts/:storyId', async (req, res) => {
     res.json({ success: true, prompts: story.prompts });
   } catch (err) {
     res.status(500).json({ error: 'Failed to get prompts.' });
+  }
+});
+// delete a story
+router.delete('/story/:id', async (req, res) => {
+  try {
+    await Story.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete story.' });
   }
 });
 
