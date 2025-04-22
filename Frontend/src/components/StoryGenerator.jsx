@@ -10,6 +10,11 @@ export default function DocumentToImages() {
     const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
     const [dragActive, setDragActive] = useState(false);
 
+    // Loading states for each API call
+    const [loadingUpload, setLoadingUpload] = useState(false);
+    const [loadingPrompts, setLoadingPrompts] = useState(false);
+    const [loadingImages, setLoadingImages] = useState(false);
+
     const inputRef = useRef(null);
 
     const handleFileChange = (e) => {
@@ -52,8 +57,9 @@ export default function DocumentToImages() {
 
     const uploadDocument = async () => {
         const formData = new FormData();
-        formData.append('storyFile', file); // IMPORTANT: field name must match `upload.single('storyFile')`
+        formData.append('storyFile', file);
 
+        setLoadingUpload(true);
         try {
             const res = await axios.post('http://localhost:5000/api/functionality/upload-story', formData);
             const { storyText, storyId: sid } = res.data;
@@ -62,30 +68,46 @@ export default function DocumentToImages() {
         } catch (err) {
             alert('Upload failed');
             console.error(err);
+        } finally {
+            setLoadingUpload(false);
         }
     };
 
     const generatePrompts = async () => {
-        const res = await axios.post(`http://localhost:5000/api/functionality/generate-prompts/${storyId}`);
-        setPrompts(res.data.prompts);
+        setLoadingPrompts(true);
+        try {
+            const res = await axios.post(`http://localhost:5000/api/functionality/generate-prompts/${storyId}`);
+            setPrompts(res.data.prompts);
+        } catch (err) {
+            alert('Prompt generation failed');
+            console.error(err);
+        } finally {
+            setLoadingPrompts(false);
+        }
     };
 
     const generateImages = async () => {
-        const res = await axios.post(`http://localhost:5000/api/functionality/generate-images/${storyId}`);
-        setImages(res.data.images);
+        setLoadingImages(true);
+        try {
+            const res = await axios.post(`http://localhost:5000/api/functionality/generate-images/${storyId}`);
+            setImages(res.data.images);
+        } catch (err) {
+            alert('Image generation failed');
+            console.error(err);
+        } finally {
+            setLoadingImages(false);
+        }
     };
+
     const handleSavePDF = async () => {
         if (!storyId) return;
-        
         setIsGeneratingPDF(true);
         try {
             const response = await axios.post(
                 `http://localhost:5000/api/pdf/generate-pdf/${storyId}`
             );
-            
             if (response.data.success) {
                 alert('PDF saved successfully!');
-                // Optional: You could redirect to the PDF library here
             }
         } catch (error) {
             console.error('PDF save failed:', error);
@@ -94,6 +116,14 @@ export default function DocumentToImages() {
             setIsGeneratingPDF(false);
         }
     };
+
+    // Simple loader component
+    const Loader = () => (
+        <div style={{ textAlign: "center", padding: "1rem" }}>
+            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <span className="ms-2">Loading...</span>
+        </div>
+    );
 
     return (
         <div className="container py-5">
@@ -127,13 +157,17 @@ export default function DocumentToImages() {
             </div>
             {/* END DRAG AND DROP FILE INPUT */}
 
-            <button onClick={uploadDocument} className="btn btn-dark mb-4">Upload Document</button>
+            <button onClick={uploadDocument} className="btn btn-dark mb-4" disabled={loadingUpload}>
+                {loadingUpload ? <Loader /> : "Upload Document"}
+            </button>
 
             {documentText && (
                 <div className="mb-4">
                     <h4>Document Text</h4>
                     <textarea className="form-control" rows="8" readOnly value={documentText}></textarea>
-                    <button onClick={generatePrompts} className="btn btn-success mt-3">Generate Prompts</button>
+                    <button onClick={generatePrompts} className="btn btn-success mt-3" disabled={loadingPrompts}>
+                        {loadingPrompts ? <Loader /> : "Generate Prompts"}
+                    </button>
                 </div>
             )}
 
@@ -145,7 +179,9 @@ export default function DocumentToImages() {
                             <li className="list-group-item" key={i}>{p}</li>
                         ))}
                     </ul>
-                    <button onClick={generateImages} className="btn btn-warning">Generate Images</button>
+                    <button onClick={generateImages} className="btn btn-warning" disabled={loadingImages}>
+                        {loadingImages ? <Loader /> : "Generate Images"}
+                    </button>
                 </div>
             )}
 
@@ -169,7 +205,7 @@ export default function DocumentToImages() {
                                 onClick={handleSavePDF}
                                 disabled={isGeneratingPDF}
                             >
-                                {isGeneratingPDF ? 'Saving PDF...' : 'Save PDF to Database'}
+                                {isGeneratingPDF ? <Loader /> : "Save PDF to Database"}
                             </button>
 
                             <a
