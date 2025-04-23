@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Card, Modal, Button } from 'react-bootstrap';
+import { Card, Modal, Button, Form } from 'react-bootstrap';
 import { Sidebar } from './Sidebar';
 
 const ComicsPage = () => {
   const [previews, setPreviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedStoryId, setSelectedStoryId] = useState(null);
   const [images, setImages] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -13,11 +14,8 @@ const ComicsPage = () => {
   useEffect(() => {
     const fetchPreviews = async () => {
       try {
-        // Fetch all stories
         const res = await axios.get('http://localhost:5000/api/story/all-stories');
         const stories = res.data.stories;
-
-        // For each story, fetch its first image for preview
         const previewsData = await Promise.all(
           stories.map(async (story) => {
             const imgsRes = await axios.get(
@@ -31,7 +29,6 @@ const ComicsPage = () => {
             };
           })
         );
-
         setPreviews(previewsData);
       } catch (err) {
         console.error('Error fetching previews:', err);
@@ -45,7 +42,6 @@ const ComicsPage = () => {
 
   const handleCardClick = async (id) => {
     if (id === selectedStoryId) {
-      // Deselect
       setSelectedStoryId(null);
       setImages([]);
       setShowModal(false);
@@ -53,7 +49,6 @@ const ComicsPage = () => {
     }
 
     try {
-      // Fetch all images for the selected story
       const res = await axios.get(
         `http://localhost:5000/api/story/stories/${id}/images`
       );
@@ -70,22 +65,39 @@ const ComicsPage = () => {
     }
   };
 
+  // Filter comics by search term
+  const filteredPreviews = previews.filter((item) =>
+    item.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="container-fluid p-4">
-      <h2 className="mb-4">Visuals - Comicbook Gallery</h2>
-      <div className="row">
-        {/* Sidebar */}
-        <div className="col-md-3 mb-4">
+    <div className="container-fluid p-0">
+      <div className="row g-0">
+        {/* Full-height Sidebar */}
+        <div className="col-md-3 vh-100 position-sticky top-0 bg-white border-end p-0">
           <Sidebar />
         </div>
 
-        {/* Preview Cards */}
-        <div className="col-md-9">
+        {/* Main Content */}
+        <div className="col-md-9 p-4">
+          {/* Page Title above search bar */}
+          <h2 className="mb-4">Comicbook Gallery</h2>
+
+          {/* Search Bar */}
+          <Form.Control
+            type="text"
+            placeholder="Search comics..."
+            className="mb-4"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
+          {/* Preview Cards */}
           {loading ? (
             <div>Loading previews...</div>
           ) : (
             <div className="row row-cols-1 row-cols-md-3 g-4">
-              {previews.map((item) => (
+              {filteredPreviews.map((item) => (
                 <div className="col" key={item._id}>
                   <Card
                     className="shadow-sm h-100"
@@ -100,7 +112,10 @@ const ComicsPage = () => {
                         style={{ height: '200px', objectFit: 'cover' }}
                       />
                     ) : (
-                      <div className="bg-light d-flex align-items-center justify-content-center" style={{ height: '200px' }}>
+                      <div
+                        className="bg-light d-flex align-items-center justify-content-center"
+                        style={{ height: '200px' }}
+                      >
                         No Preview
                       </div>
                     )}
